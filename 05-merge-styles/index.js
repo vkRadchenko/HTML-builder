@@ -7,7 +7,6 @@ const stylesPath = path.join(__dirname, 'styles');
 const bindleFile = path.join(distPath, 'bundle.css');
 
 const mergeStyle = async () => {
-  const readDistFolder = await readdir(distPath);
 
   const readStyleFolder = await readdir(stylesPath);
   const output = fs.createWriteStream(bindleFile);
