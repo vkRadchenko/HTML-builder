@@ -9,8 +9,6 @@ const indexFile = path.join(distFolderPath, 'index.html');
 
 const stylesPath = path.join(__dirname, 'styles');
 
-const bindleFile = path.join(distFolderPath, 'style.css');
-
 const sourceFonts = path.join(__dirname, 'assets/fonts');
 const sourceImg = path.join(__dirname, 'assets/img');
 const sourceSvg = path.join(__dirname, 'assets/svg');
@@ -20,30 +18,28 @@ const distFolderImg = path.join(__dirname, 'project-dist/assets/img');
 const distFolderSvg = path.join(__dirname, 'project-dist/assets/svg');
 
 const mergeStyle = async () => {
-  try {
-    const files = await readdir(stylesPath);
-    let output = createWriteStream(bindleFile);
+  const bundleFile = path.join(distFolderPath, 'style.css');
+  const files = await readdir(stylesPath);
 
-    files.reduce(async (acc, fail) => {
-      const pathFile = path.join(stylesPath, fail);
-      const elStats = path.extname(pathFile);
+  let output = await createWriteStream(bundleFile);
 
-      if (elStats === '.css') {
-        const input = createReadStream(pathFile);
+  files.reduce(async (acc, fail) => {
+    const pathFile = path.join(stylesPath, fail);
+    const elStats = path.extname(pathFile);
 
-        let data = [];
+    if (elStats === '.css') {
+      const input = await createReadStream(pathFile);
 
-        input.on('data', (chunk) => {
-          data += chunk;
-        });
-        input.on('end', () => console.log('End', data.length));
-        input.on('error', (error) => console.log('Error', error.message));
-        input.on('data', (chunk) => output.write(chunk));
-      }
-    }, 0);
-  } catch (error) {
-    console.log(error);
-  }
+      let data = [];
+
+      input.on('data', (chunk) => {
+        data += chunk;
+      });
+      input.on('end', () => console.log('End', data.length));
+      input.on('error', (error) => console.log('Error', error.message));
+      input.on('data', (chunk) => output.write(chunk));
+    }
+  }, 0);
 };
 
 const copyFiles = async (sourceFonts, distFolderFonts) => {
@@ -85,7 +81,6 @@ const buildPage = async () => {
 
   const componentMatches = readTemplateHTML.match(/{{\w+}}/g) || [];
   const componentNames = componentMatches.map((match) => match.slice(2, -2));
-  console.log(componentNames);
 
   const componentContents = await Promise.all(
     componentNames.map((componentName) => readComponent(componentName))
