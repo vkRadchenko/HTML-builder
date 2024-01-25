@@ -1,13 +1,13 @@
+const fs = require('fs').promises;
 const { pipeline } = require('stream/promises');
-const fs = require('fs/promises');
 const path = require('path');
 const { createReadStream, createWriteStream } = require('fs');
-const { readdir } = require('node:fs/promises');
 
 const distFolderPath = path.join(__dirname, 'project-dist');
 const indexFile = path.join(distFolderPath, 'index.html');
+const bundleFile = path.join(distFolderPath, 'style.css');
 
-const stylesPath = path.join(__dirname, 'styles');
+const stylesFolderPath = path.join(__dirname, 'styles');
 
 const sourceFonts = path.join(__dirname, 'assets/fonts');
 const sourceImg = path.join(__dirname, 'assets/img');
@@ -18,17 +18,17 @@ const distFolderImg = path.join(__dirname, 'project-dist/assets/img');
 const distFolderSvg = path.join(__dirname, 'project-dist/assets/svg');
 
 const mergeStyle = async () => {
-  const bundleFile = path.join(distFolderPath, 'style.css');
-  const files = await readdir(stylesPath);
+  await fs.mkdir(distFolderPath, { recursive: true });
 
-  let output = await createWriteStream(bundleFile);
+  const readStyleFolder = await fs.readdir(stylesFolderPath);
+  const output = createWriteStream(bundleFile);
 
-  files.reduce(async (acc, fail) => {
-    const pathFile = path.join(stylesPath, fail);
+  readStyleFolder.reduce(async (acc, fail) => {
+    const pathFile = path.join(stylesFolderPath, fail);
     const elStats = path.extname(pathFile);
 
     if (elStats === '.css') {
-      const input = await createReadStream(pathFile);
+      const input = createReadStream(pathFile);
 
       let data = [];
 
